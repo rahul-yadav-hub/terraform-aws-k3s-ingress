@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-official-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-official
+  template:
+    metadata:
+      labels:
+        app: nginx-official
+    spec:
+      containers:
+        - name: nginx-official
+          image: 'nginx:latest'
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-official-service
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: nginx-official
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: test.<Replace with your root domain>
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: nginx-official-service
+                port:
+                  number: 80
